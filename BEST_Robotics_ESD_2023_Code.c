@@ -1,3 +1,4 @@
+#pragma config(UART_Usage, UART1, uartUserControl, baudRate1200, IOPins, None, None)
 #pragma config(Sensor, port1,  liftSensorR,    sensorVexIQ_Touch)
 #pragma config(Sensor, port3,  liftSensorL,    sensorVexIQ_Touch)
 #pragma config(Sensor, port5,  armSensorR,    sensorVexIQ_Touch)
@@ -67,16 +68,16 @@ int moveLowerBound = 20; // Movement sensitivity.
 int armLowerBound = 40; // Arm sensitivity.
 int moveMode = 1; // Movement setting; tank movement is 1, arcade movement is 2.
 int armState = 2; // Field robot center lever states for IR; 1 is rotate, 2 is drive, 3 is lift.
-int sensitivity_mode = 1; // Normal mode is 1, sensitive mode is 2.
+int mode = 1; // Normal mode is 1, sensitive mode is 2.
 short ch = 0xAA; // IR character storage.
 
 task sensitivity_mode { // Toggle sensitivity mode.
 	if(vexRT[Btn5D]) {
-		if (sensitivity_mode == 1) {
-			sensitivity_mode = 2;
+		if (mode == 1) {
+			mode = 2;
 			moveMult = 0.5;
-		} else if (sensitivity_mode == 2) {
-			sensitivity_mode = 1;
+			} else if (mode == 2) {
+			mode = 1;
 			moveMult = 1;
 		}
 	}
@@ -122,26 +123,25 @@ task move { // Movement of the robot itself.
 
 task arm { // Arm movement.
 
-		if(vexRT[Btn8D] && sensor[liftSensorR] != 0){ // button pressed and snap action switch is off
-			motor[motorLift] = 127;
-		} else if (vexRT[Btn8U] && sensor[liftSensorL] != 0) { // and snap action switch is off
-			motor[motorLift] = -127;
+	if(vexRT[Btn8D] && SensorValue[liftSensorR] != 0){ // button pressed and snap action switch is off
+		motor[motorLift] = 127;
+		} else if (vexRT[Btn8U] && SensorValue[liftSensorL] != 0) { // and snap action switch is off
+		motor[motorLift] = -127;
 		} else {
-			motor[motorLift] = 0;
-		}
-  }
-		if(vexRT[Btn7D] && sensor[armSensorR] != 0) { // and snap action switch is off
-			motor[motorArm] = 127;
-		} else if (vexRT[Btn7U] && sensor[armSensorL] != 0) { // and snap action switch is off
-			motor[motorArm] = -127;
+		motor[motorLift] = 0;
+	}
+	if(vexRT[Btn7D] && SensorValue[armSensorR] != 0) { // and snap action switch is off
+		motor[motorArm] = 127;
+		} else if (vexRT[Btn7U] && SensorValue[armSensorL] != 0) { // and snap action switch is off
+		motor[motorArm] = -127;
 		} else {
-			motor[motorArm] = 0;
-		}
+		motor[motorArm] = 0;
+	}
 } // end task
 
 task autonomous {
 	if (vexRT[Btn7L] && vexRT[Btn7R]) {
-		while(auto_started) {
+		while(true) {
 			if (vexRT[Btn8L] && vexRT[Btn8R]) {
 				break;
 			}
@@ -150,14 +150,15 @@ task autonomous {
 			// how the hell do we do this
 		}
 	}
+}
 
 
-task main { // Runs all the tasks above.
-	setBaud(UART1, 600); // Sets the infared rate of the IR transmitter.
-	while (true) {
-		startTask(move_mode);
-		startTask(sensitivity_mode
-		startTask(move);
-		startTask(arm);
-	}
-} // end main
+	task main { // Runs all the tasks above.
+		setBaud(UART1, 600); // Sets the infared rate of the IR transmitter.
+		while (true) {
+			startTask(move_mode);
+			startTask(sensitivity_mode);
+			startTask(move);
+			startTask(arm);
+		}
+	} // end main
