@@ -156,19 +156,19 @@ task autonomous {
 				moveMode = 1;
 				break;
 			}
-			if (vexRT[Btn8L]){ // This determines what brains are taken
+			if (vexRT[Btn7L]){ // This determines what brains are taken
 				if(target1 == 0){target1 = 1;}
 				else{target2 = 1;} // Target leftmost brain
 		  }
-			if (vexRT[Btn8U]){
+			if (vexRT[Btn7R]){
 				if(target1 == 0){target1 = 2;}
 				else{target2 = 2;} // Target midleft brain
 			}
-			if (vexRT[Btn8R]){
+			if (vexRT[Btn8L]){
 				if(target1 == 0){target1 = 3;}
 				else{target2 = 3;} // Target midright brain
 			}
-			if (vexRT[Btn8D]){
+			if (vexRT[Btn8R]){
 				if(target1 == 0){target1 = 4;}
 				else{target2 = 4;} // Target rightmost brain
 			}
@@ -198,7 +198,57 @@ task autonomous {
 					if (autonomousMoveMult > 1) {autonomousMoveMult = 1;} // Guard against move mult going past range of the motor
 					if (SensorValue[tipOfRobotSensor] == 0){
 						while(deadReckoningDone != true){ // Use dead reckoning for the brains, no other way to do this.
-
+							// back up and lift motor
+							motor[motorL] = -127;
+							motor[motorR] = -127;
+							motor[motorLift] = 127;
+							wait1Msec(4000);
+							// continue lifting
+							motor[motorL] = 0;
+							motor[motorR] = 0;
+							wait1Msec(1000);
+							// bring motor down and turn right
+							motor[motorLift] = -127;
+							motor[motorL] = 127;
+							motor[motorR] = -127;
+							wait1Msec(500);
+							motor[motorLift] = 0;
+							wait1Msec(500);
+							motor[motorL] = 127;
+							motor[motorR] = 127;
+							wait1Msec(100);
+							motor[motorL] = -127;
+							motor[motorR] = 127;
+							wait1Msec(1000);
+							// put motor in good position
+							if(target1 == 1 || target1 == 2 || target2 == 1 || target2 == 2) {
+								motor[motorL] = 127;
+								motor[motorR] = 127;
+								wait1Msec(750);
+								motor[motorL] = -127;
+								motor[motorR] = -127;
+								wait1Msec(750);
+							}
+							
+							motor[motorL] = -127;
+							motor[motorR] = 127;
+							wait1Msec(1000);
+							motor[motorL] = 127;
+							motor[motorR] = 127;
+							wait1Msec(100);
+							motor[motorL] = 127;
+							motor[motorR] = -127;
+							wait1Msec(1000);
+							
+							if(target1 == 3 || target1 == 4 || target2 == 3 || target2 == 4) {
+								motor[motorL] = 127;
+								motor[motorR] = 127;
+								wait1Msec(750);
+								motor[motorL] = -127;
+								motor[motorR] = -127;
+								wait1Msec(750);
+							}
+							
 							deadReckoningDone = true;
 						}
 
@@ -211,12 +261,13 @@ task autonomous {
 }
 
 
-	task main { // Runs all the tasks above.
-		setBaud(UART1, 600); // Sets the infared rate of the IR transmitter.
-		while (true) {
-			startTask(move_mode);
-			startTask(sensitivity_mode);
-			startTask(move);
-			startTask(arm);
-		}
-	} // end main
+task main { // Runs all the tasks above.
+	setBaud(UART1, 600); // Sets the infared rate of the IR transmitter.
+	while (true) {
+		startTask(move_mode);
+		startTask(sensitivity_mode);
+		startTask(move);
+		startTask(arm);
+		startTask(autonomous);
+	}
+} // end main
