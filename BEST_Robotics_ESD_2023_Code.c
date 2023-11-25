@@ -295,7 +295,7 @@ task autonomous {
 							}
 							backB();
 							if(target2*2 <= currentPositionInTermsOfA){
-							left90Degrees();
+								left90Degrees();
 								while(currentPositionInTermsOfA > target2*2)
 								{
 									if (vexRT[Btn5U] && vexRT[Btn6U]) { // Cancels autonomous mode
